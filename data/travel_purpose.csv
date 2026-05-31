@@ -1,0 +1,17 @@
+Purpose,Quarter,DomesticTrips,VisitorNights,Expenditure
+Holiday,Q1,44268,46862,21105
+Visiting friends and relatives,Q1,30825,37503,9649
+Business,Q1,9561,13960,5615
+Other,Q1,9742,5589,2510
+Holiday,Q2,46813,40017,20077
+Visiting friends and relatives,Q2,31454,33423,9379
+Business,Q2,8661,10079,4448
+Other,Q2,10059,6157,2471
+Holiday,Q3,48862,41045,21316
+Visiting friends and relatives,Q3,32428,32828,9981
+Business,Q3,7966,8047,3966
+Other,Q3,10448,6932,2651
+Holiday,Q4,50299,45363,22495
+Visiting friends and relatives,Q4,33069,35926,10878
+Business,Q4,7330,7035,3907
+Other,Q4,10118,7653,2714

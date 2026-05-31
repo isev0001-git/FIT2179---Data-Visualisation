@@ -1,0 +1,33 @@
+State,Quarter,DomesticTrips,VisitorNights,Expenditure
+New South Wales,Q1,29804,33045,11594
+Victoria,Q1,29181,26342,9892
+Queensland,Q1,18277,22569,8824
+South Australia,Q1,6008,7486,2361
+Western Australia,Q1,9361,9454,3892
+Tasmania,Q1,2041,3435,1121
+Northern Territory,Q1,442,709,295
+Australian Capital Territory,Q1,1030,1652,655
+New South Wales,Q2,30289,27614,10552
+Victoria,Q2,28287,20487,8749
+Queensland,Q2,20651,21782,8895
+South Australia,Q2,5935,6216,2181
+Western Australia,Q2,9698,8587,3784
+Tasmania,Q2,1830,2502,862
+Northern Territory,Q2,626,1098,539
+Australian Capital Territory,Q2,1037,1493,614
+New South Wales,Q3,31030,26457,10956
+Victoria,Q3,28840,18961,8883
+Queensland,Q3,21656,24305,9689
+South Australia,Q3,6003,5428,2202
+Western Australia,Q3,9945,8562,3996
+Tasmania,Q3,1791,2127,770
+Northern Territory,Q3,656,1581,701
+Australian Capital Territory,Q3,1158,1529,634
+New South Wales,Q4,32120,31126,12253
+Victoria,Q4,29613,21450,9518
+Queensland,Q4,20718,23303,9444
+South Australia,Q4,6251,6427,2536
+Western Australia,Q4,10036,8805,4132
+Tasmania,Q4,1957,2613,994
+Northern Territory,Q4,490,842,450
+Australian Capital Territory,Q4,1112,1611,665
