@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Australian Tourism 2025</title>
+
+    <!-- Vega Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+
+        background-color: #eaf0ff;
+
+        color: #1e293b;
+
+        margin: 40px;
+      }
+
+      h1 {
+        font-size: 42px;
+        font-weight: 700;
+
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        font-size: 24px;
+        font-weight: 600;
+
+        margin-top: 60px;
+        margin-bottom: 15px;
+      }
+
+      h3 {
+        font-size: 20px;
+        font-weight: 600;
+
+        margin-top: 60px;
+        margin-bottom: 15px;
+      }
+
+      p {
+        color: #475569;
+        line-height: 1.6;
+      }
+
+      .chart-container {
+        background: white;
+
+        padding: 20px;
+
+        margin-top: 20px;
+
+        margin-bottom: 40px;
+
+        border-radius: 16px;
+
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      select {
+        padding: 10px;
+
+        border-radius: 8px;
+
+        border: 1px solid #cbd5e1;
+
+        font-size: 16px;
+
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Australian Domestic Tourism in 2025</h1>
+
+    <p>
+      Explore how tourism activity varied across Australian states, travel
+      purposes and expenditure categories throughout 2025.
+    </p>
+
+    <h2>Where does domestic tourism generate the most value in Australia?</h2>
+    <h3>Tourism expenditure across Australian states during Q4 2025.</h3>
+    <div class="chart-container">
+      <div id="map"></div>
+      <p>
+        New South Wales consistently generated the highest tourism expenditure
+        throughout 2025, followed by Victoria and Queensland. This highlights
+        the dominance of Australia's most populous states in driving domestic
+        tourism spending.
+      </p>
+    </div>
+
+    <script>
+      const mapSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Tourism Expenditure by State (Q4 2025)",
+
+        "data": {
+          "url": "data/states.geojson",
+          "format": {
+            "property": "features"
+          }
+        },
+
+        "transform": [
+          {
+            "lookup": "properties.STATE_NAME",
+
+            "from": {
+              "data": {
+                "url": "data/domestic_trips_by_state.csv"
+              },
+
+              "key": "State",
+
+              "fields": [
+                "Quarter",
+                "DomesticTrips",
+                "VisitorNights",
+                "Expenditure"
+              ]
+            }
+          },
+
+          {
+            "filter": {
+              "field": "Quarter",
+              "equal": "Q4"
+            }
+          }
+        ],
+
+        "mark": {
+          "type": "geoshape",
+          "stroke": "black",
+          "strokeWidth": 1
+        },
+
+        "encoding": {
+          "color": {
+            "field": "Expenditure",
+            "type": "quantitative",
+            "title": "Expenditure ($M)",
+            "scale": {
+              "scheme": "blues"
+            }
+          },
+
+          "tooltip": [
+            {
+              "field": "properties.STATE_NAME",
+              "title": "State"
+            },
+
+            {
+              "field": "DomesticTrips",
+              "title": "Trips ('000)"
+            },
+
+            {
+              "field": "VisitorNights",
+              "title": "Visitor Nights ('000)"
+            },
+
+            {
+              "field": "Expenditure",
+              "title": "Expenditure ($M)"
+            }
+          ]
+        },
+
+        "projection": {
+          "type": "mercator"
+        }
+      };
+
+      let view;
+
+      vegaEmbed("#map", mapSpec).then((result) => {
+        view = result.view;
+      });
+
+      document
+        .getElementById("quarterSelect")
+        .addEventListener("change", function () {
+          const quarter = this.value;
+
+          mapSpec.transform[1] = {
+            "filter": {
+              "field": "Quarter",
+              "equal": quarter
+            }
+          };
+
+          vegaEmbed("#map", mapSpec);
+        });
+    </script>
+
+    <h3>Tourism Expenditure by State and Quarter</h3>
+    <div class="chart-container">
+      <div id="heatmap"></div>
+      <p>
+        Smaller jurisdictions such as Tasmania, the Northern Territory and the
+        Australian Capital Territory contributed a much smaller share of
+        national tourism expenditure.
+      </p>
+    </div>
+
+    <script>
+      const heatmapSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Tourism Expenditure Across States and Quarters",
+
+        "data": {
+          "url": "data/domestic_trips_by_state.csv"
+        },
+
+        "mark": {
+          "type": "rect",
+          "stroke": "white"
+        },
+
+        "encoding": {
+          "x": {
+            "field": "Quarter",
+            "type": "ordinal",
+            "title": "Quarter",
+            "axis": {
+              "labelAngle": 0
+            }
+          },
+
+          "y": {
+            "field": "State",
+            "type": "nominal",
+            "sort": [
+              "New South Wales",
+              "Victoria",
+              "Queensland",
+              "Western Australia",
+              "South Australia",
+              "Tasmania",
+              "Northern Territory",
+              "Australian Capital Territory"
+            ],
+            "title": "State"
+          },
+
+          "color": {
+            "field": "Expenditure",
+            "type": "quantitative",
+            "title": "Expenditure ($M)",
+            "scale": {
+              "scheme": "blues"
+            }
+          },
+
+          "tooltip": [
+            {
+              "field": "State",
+              "title": "State"
+            },
+            {
+              "field": "Quarter",
+              "title": "Quarter"
+            },
+            {
+              "field": "Expenditure",
+              "title": "Expenditure ($M)"
+            },
+            {
+              "field": "DomesticTrips",
+              "title": "Trips ('000)"
+            },
+            {
+              "field": "VisitorNights",
+              "title": "Visitor Nights ('000)"
+            }
+          ]
+        }
+      };
+
+      vegaEmbed("#heatmap", heatmapSpec);
+    </script>
+
+    <h3>Change in Tourism Expenditure from Q1 to Q4</h3>
+
+    <div class="chart-container">
+      <div id="growthChart"></div>
+      <p>
+        Several states experienced stronger spending in the December quarter
+        (Q4), suggesting increased tourism activity during the holiday season.
+        Meanwhile Tasmania and Victoria has experienced a negative change in
+        expenditure, this shows that these states are not highly visited during
+        the holiday season
+      </p>
+    </div>
+    <script>
+      const growthSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 850,
+        "height": 400,
+
+        "title": "Tourism Expenditure Growth (Q1 to Q4)",
+
+        "data": {
+          "url": "data/domestic_trips_by_state.csv"
+        },
+
+        "transform": [
+          {
+            "pivot": "Quarter",
+            "value": "Expenditure",
+            "groupby": ["State"]
+          },
+
+          {
+            "calculate": "datum.Q4 - datum.Q1",
+            "as": "Growth"
+          }
+        ],
+
+        "mark": "bar",
+
+        "encoding": {
+          "y": {
+            "field": "State",
+            "type": "nominal",
+            "sort": "-x",
+            "title": "State"
+          },
+
+          "x": {
+            "field": "Growth",
+            "type": "quantitative",
+            "title": "Change in Expenditure ($M)"
+          },
+
+          "color": {
+            "condition": {
+              "test": "datum.Growth > 0",
+              "value": "#2563EB"
+            },
+            "value": "#93C5FD"
+          },
+
+          "tooltip": [
+            {
+              "field": "State"
+            },
+            {
+              "field": "Growth",
+              "title": "Growth ($M)"
+            }
+          ]
+        }
+      };
+
+      vegaEmbed("#growthChart", growthSpec);
+    </script>
+
+    <h2>Why do Australians travel?</h2>
+
+    <h3>Change in travel purpose over time</h3>
+    <div class="chart-container">
+      <div id="stackedPurpose"></div>
+      <p>
+        Holiday travel was the most common purpose throughout 2025 and showed
+        steady growth across all four quarters.
+      </p>
+      <p>
+        Business travel declined significantly over the year, suggesting that
+        leisure travel played a much larger role in domestic tourism demand than
+        work-related travel.
+      </p>
+    </div>
+    <script>
+      const stackedPurposeSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 300,
+        "height": 500,
+
+        "data": {
+          "url": "data/travel_purpose.csv"
+        },
+
+        "mark": "bar",
+
+        "encoding": {
+          "x": {
+            "field": "Quarter",
+            "type": "ordinal",
+            "scale": {
+              "paddingInner": 0.4,
+              "paddingOuter": 0.2
+            },
+            "axis": {
+              "labelAngle": 0
+            }
+          },
+
+          "y": {
+            "aggregate": "sum",
+            "field": "DomesticTrips",
+            "stack": "normalize",
+            "type": "quantitative"
+          },
+
+          "color": {
+            "field": "Purpose",
+            "type": "nominal",
+            "scale": {
+              "range": ["#2563EB", "#14B8A6", "#F59E0B", "#EF4444"]
+            }
+          }
+        }
+      };
+
+      vegaEmbed("#stackedPurpose", stackedPurposeSpec);
+    </script>
+
+    <h3>Expenditure of travel purpose over time</h3>
+
+    <div class="chart-container">
+      <div id="purposeExpenditure"></div>
+      <p>
+        Even though the number of "other" trips were higher than "Business"
+        trips, Business trips have had more expenditure than other trips, mainly
+        due to higher expenses
+      </p>
+    </div>
+    <script>
+      const purposeExpenditureSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "data": {
+          "url": "data/travel_purpose.csv"
+        },
+
+        "mark": {
+          "type": "line",
+          "point": true,
+          "strokeWidth": 3
+        },
+
+        "encoding": {
+          "x": {
+            "field": "Quarter",
+            "type": "ordinal",
+            "axis": {
+              "labelAngle": 0
+            }
+          },
+
+          "y": {
+            "field": "Expenditure",
+            "type": "quantitative"
+          },
+
+          "color": {
+            "field": "Purpose",
+            "type": "nominal",
+            "scale": {
+              "range": ["#2563EB", "#14B8A6", "#F59E0B", "#EF4444"]
+            }
+          },
+          "tooltip": [
+            {
+              "field": "Purpose",
+              "title": "Purpose"
+            },
+
+            {
+              "field": "Quarter",
+              "title": "Quarter"
+            },
+
+            {
+              "field": "DomesticTrips",
+              "title": "Trips ('000)"
+            },
+
+            {
+              "field": "Expenditure",
+              "title": "Expenditure ($M)"
+            }
+          ]
+        }
+      };
+
+      vegaEmbed("#purposeExpenditure", purposeExpenditureSpec);
+    </script>
+
+    <h2>How does tourism activity differ across Australian states?</h2>
+
+    <h3>Tourism Activity by State</h3>
+    <div class="chart-container">
+      <div id="bubbleChart"></div>
+      <p>
+        States with larger bubbles generally generated higher expenditure,
+        indicating a strong relationship between visitor volume and tourism
+        revenu
+      </p>
+    </div>
+
+    <script>
+      const bubbleSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Tourism Activity by State (Q4 2025)",
+
+        "data": {
+          "url": "data/domestic_trips_by_state.csv"
+        },
+
+        "transform": [
+          {
+            "filter": "datum.Quarter == 'Q4'"
+          }
+        ],
+
+        "mark": {
+          "type": "circle",
+          "opacity": 0.75
+        },
+
+        "encoding": {
+          "x": {
+            "field": "DomesticTrips",
+            "type": "quantitative",
+            "title": "Domestic Trips ('000)"
+          },
+
+          "y": {
+            "field": "Expenditure",
+            "type": "quantitative",
+            "title": "Expenditure ($M)"
+          },
+
+          "size": {
+            "field": "VisitorNights",
+            "type": "quantitative",
+            "title": "Visitor Nights ('000)",
+            "scale": {
+              "range": [200, 5000]
+            }
+          },
+
+          "color": {
+            "field": "State",
+            "type": "nominal"
+          },
+
+          "tooltip": [
+            {
+              "field": "State",
+              "title": "State"
+            },
+            {
+              "field": "DomesticTrips",
+              "title": "Trips ('000)"
+            },
+            {
+              "field": "VisitorNights",
+              "title": "Visitor Nights ('000)"
+            },
+            {
+              "field": "Expenditure",
+              "title": "Expenditure ($M)"
+            }
+          ]
+        }
+      };
+
+      vegaEmbed("#bubbleChart", bubbleSpec);
+    </script>
+
+    <h3>Visitor Nights vs Domestic Trips by State</h3>
+    <div class="chart-container">
+      <div id="nightsVsTrips"></div>
+      <p>
+        Queensland generated relatively high visitor nights compared to its
+        number of trips, suggesting that visitors tend to stay longer in the
+        state.
+      </p>
+    </div>
+
+    <script>
+      const nightsVsTripsSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Visitor Nights vs Domestic Trips (Q4 2025)",
+
+        "data": {
+          "url": "data/domestic_trips_by_state.csv"
+        },
+
+        "transform": [
+          {
+            "filter": "datum.Quarter == 'Q4'"
+          }
+        ],
+
+        "layer": [
+          {
+            "mark": {
+              "type": "circle",
+              "size": 400,
+              "opacity": 0.7
+            },
+
+            "encoding": {
+              "x": {
+                "field": "DomesticTrips",
+                "type": "quantitative",
+                "title": "Domestic Trips ('000)",
+                "axis": {
+                  "labelAngle": 0
+                }
+              },
+
+              "y": {
+                "field": "VisitorNights",
+                "type": "quantitative",
+                "title": "Visitor Nights ('000)"
+              },
+
+              "color": {
+                "field": "State",
+                "type": "nominal"
+              },
+
+              "tooltip": [
+                { "field": "State" },
+                { "field": "DomesticTrips" },
+                { "field": "VisitorNights" },
+                { "field": "Expenditure" }
+              ]
+            }
+          },
+
+          {
+            "mark": {
+              "type": "text",
+              "dy": -12
+            },
+
+            "encoding": {
+              "x": {
+                "field": "DomesticTrips",
+                "type": "quantitative"
+              },
+
+              "y": {
+                "field": "VisitorNights",
+                "type": "quantitative"
+              }
+            }
+          }
+        ]
+      };
+
+      vegaEmbed("#nightsVsTrips", nightsVsTripsSpec);
+    </script>
+
+    <h2>How efficiently do states convert tourism into revenue?</h2>
+    <h3>Average spending of tourist per trip by states</h3>
+    <div class="chart-container">
+      <div id="expenditurePerTrip"></div>
+      <p>
+        Some states generated significantly more expenditure per trip than
+        others, indicating differences in tourist spending behaviour and travel
+        costs.
+      </p>
+    </div>
+
+    <script>
+      const expenditurePerTripSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Average spending of tourist per trip by statesn (Q4 2025)",
+
+        "data": {
+          "url": "data/domestic_trips_by_state.csv"
+        },
+
+        "transform": [
+          { "filter": "datum.Quarter == 'Q4'" },
+          {
+            "calculate": "(datum.Expenditure * 1000) / datum.DomesticTrips",
+            "as": "Dollars spent per trip"
+          }
+        ],
+
+        "mark": "bar",
+
+        "encoding": {
+          "x": {
+            "field": "State",
+            "type": "nominal",
+            "axis": {
+              "labelAngle": 0
+            }
+          },
+
+          "y": {
+            "field": "Dollars spent per trip",
+            "type": "quantitative"
+          },
+
+          "tooltip": [
+            {
+              "field": "State",
+              "title": "State"
+            },
+            {
+              "field": "Dollars spent per trip",
+              "title": "Dollars spent per trip"
+            }
+          ],
+
+          "color": {
+            "field": "Dollars spent per trip",
+            "type": "quantitative"
+          }
+        }
+      };
+
+      vegaEmbed("#expenditurePerTrip", expenditurePerTripSpec);
+    </script>
+    <h3>Average spending of tourist per night by states</h3>
+    <div class="chart-container">
+      <div id="expenditurePerNight"></div>
+      <p>
+        Higher spending per night indicates that certain destinations are able
+        to capture more economic value from each visitor stay.
+      </p>
+    </div>
+
+    <script>
+      const expenditurePerNightSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Average spending of tourist per night by statesn (Q4 2025)",
+
+        "data": {
+          "url": "data/domestic_trips_by_state.csv"
+        },
+
+        "transform": [
+          { "filter": "datum.Quarter == 'Q4'" },
+          {
+            "calculate": "(datum.Expenditure * 1000) / datum.VisitorNights",
+            "as": "Dollars spent per night"
+          }
+        ],
+
+        "mark": "bar",
+
+        "encoding": {
+          "x": {
+            "field": "State",
+            "type": "nominal",
+            "axis": {
+              "labelAngle": 0
+            }
+          },
+
+          "y": {
+            "field": "Dollars spent per night",
+            "type": "quantitative"
+          },
+
+          "tooltip": [
+            {
+              "field": "State",
+              "title": "State"
+            },
+            {
+              "field": "Dollars spent per night",
+              "title": "Dollars spent per night"
+            }
+          ],
+
+          "color": {
+            "field": "Dollars spent per night",
+            "type": "quantitative"
+          }
+        }
+      };
+
+      vegaEmbed("#expenditurePerNight", expenditurePerNightSpec);
+    </script>
+
+    <h2>What do tourists actually spend their money on?</h2>
+    <h3>Tourism Expenditure by Categories</h3>
+    <div class="chart-container">
+      <div id="treeMap"></div>
+      <p>
+        Accommodation, restaurant meals and petrol accounted for the largest
+        categories of tourism expenditure in 2025, which are essential expenses
+        during a trip.
+      </p>
+    </div>
+
+    <script>
+      const treemapSpec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+        "width": 900,
+        "height": 500,
+
+        "title": "Tourism Spending Breakdown (Q4 2025)",
+
+        "data": {
+          "url": "data/tourism_expenditure.csv"
+        },
+
+        "transform": [
+          {
+            "filter": "datum.Quarter == 'Q4'"
+          }
+        ],
+
+        "mark": "rect",
+
+        "encoding": {
+          "x": {
+            "field": "Category",
+            "type": "nominal",
+            "sort": "-y",
+            "axis": {
+              "labelAngle": -45
+            }
+          },
+
+          "y": {
+            "field": "Expenditure",
+            "type": "quantitative",
+            "title": "Expenditure ($M)"
+          },
+
+          "color": {
+            "field": "Expenditure",
+            "type": "quantitative",
+            "scale": {
+              "scheme": "tealblues"
+            }
+          },
+
+          "tooltip": [
+            {
+              "field": "Category",
+              "title": "Category"
+            },
+
+            {
+              "field": "Expenditure",
+              "title": "Expenditure ($M)"
+            }
+          ]
+        }
+      };
+
+      vegaEmbed("#treeMap", treemapSpec);
+    </script>
+  </body>
+</html>
